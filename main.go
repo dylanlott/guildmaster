@@ -6,17 +6,30 @@ import (
 	"io"
 	"log"
 	"os"
+	"sort"
+	"strings"
 
 	elogo "github.com/kortemy/elo-go"
 )
+
+// The default starting score of players in our analyzer.
+var defaultStartingScore = 1500
 
 type currentGame struct {
 	winner string
 	loser  string
 }
 
+type finalScore struct {
+	player   string
+	eloScore int
+}
+
 func main() {
 	elo := elogo.NewElo()
+	elo.D = 800
+	elo.K = 40
+
 	scores := map[string]int{}
 
 	f, err := os.Open("mtgscores.csv")
@@ -35,17 +48,11 @@ func main() {
 			break
 		}
 
-		// each record is a game so we need to run all of the scores for the game.
-		// fmt.Printf("rec: %v\n", rec)
-		// date := rec[0]
-
 		players := rec[2:]
-
 		currentGame := []string{}
 		for _, player := range players {
+			player = strings.TrimSpace(player)
 			if player == "" {
-				// end of players, end of game def
-				log.Printf("game: %v", currentGame)
 
 				// score the game once we've assembled it.
 				err := ScoreGame(elo, scores, currentGame)
@@ -59,7 +66,28 @@ func main() {
 			currentGame = append(currentGame, player)
 		}
 	}
-	log.Printf("player scores %v", scores)
+
+	// build final scores list
+	finalScores := []finalScore{}
+	for k, v := range scores {
+		fs := finalScore{
+			player:   k,
+			eloScore: v,
+		}
+		finalScores = append(finalScores, fs)
+	}
+
+	// sort in descending order
+	sort.Slice(finalScores, func(i int, j int) bool {
+		return finalScores[i].eloScore > finalScores[j].eloScore
+	})
+
+	// print out final scores
+	for i, v := range finalScores {
+		log.Printf("%d --- %s --- %d", i, v.player, v.eloScore)
+	}
+
+	// log.Printf("player scores %v", scores)
 }
 
 // ScoreGame iterates over a game and updates scores in the playerMap accordingly
@@ -79,15 +107,15 @@ func ScoreGame(elo *elogo.Elo, scores map[string]int, game []string) error {
 		playerA := game[place]
 		playerB := game[place+1]
 
-		// get player scorse
+		// get player scores from our score map
 		_, ok := scores[playerA]
 		if !ok {
-			scores[playerA] = 1500
+			scores[playerA] = defaultStartingScore
 		}
 
 		_, ok = scores[playerB]
 		if !ok {
-			scores[playerB] = 1500
+			scores[playerB] = defaultStartingScore
 		}
 
 		// get ranks after we've assured defaults
@@ -95,22 +123,20 @@ func ScoreGame(elo *elogo.Elo, scores map[string]int, game []string) error {
 		rankB := scores[playerB]
 
 		// check existence of player in map and set default score if they don't exist
-		log.Printf("comparing ranks %s - %d to %s - %d", playerA, rankA, playerB, rankB)
+		// log.Printf("comparing ranks %s - %d to %s - %d", playerA, rankA, playerB, rankB)
 
 		// Results for A in the outcome of A defeats B
 		score := 1                                             // Use 1 in case A wins, 0 in case B wins, 0.5 in case of a draw
 		delta := elo.RatingDelta(rankA, rankB, float64(score)) // 20
-		log.Printf("rating delta between %s and %s: %d", playerA, playerB, delta)
+		// log.Printf("rating delta between %s and %s: %d", playerA, playerB, delta)
 
 		updatedRating := elo.Rating(rankA, rankB, float64(score)) // 1520
 
 		scores[playerA] = updatedRating
-		log.Printf("updated %s score: %d", playerA, scores[playerA])
+		// log.Printf("updated %s score: %d", playerA, scores[playerA])
 
 		scores[playerB] = scores[playerB] - delta
-		log.Printf("updated %s score: %d", playerB, scores[playerB])
-
+		// log.Printf("updated %s score: %d", playerB, scores[playerB])
 	}
-
 	return nil
 }
