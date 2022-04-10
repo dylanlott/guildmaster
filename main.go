@@ -40,12 +40,10 @@ func main() {
 	for {
 		rec, err := reader.Read()
 		if err != nil {
-			log.Printf("error processing record: %v", err)
-			break
-		}
-		if err == io.EOF {
-			log.Printf("finished scanning csv records")
-			break
+			if err == io.EOF {
+				break
+			}
+			log.Fatalf("error processing record: %v", err)
 		}
 
 		players := rec[2:]
@@ -84,7 +82,7 @@ func main() {
 
 	// print out final scores
 	for i, v := range finalScores {
-		log.Printf("%d --- %s --- %d", i, v.player, v.eloScore)
+		fmt.Printf("%d --- %s --- %d\n", i, v.player, v.eloScore)
 	}
 
 	// log.Printf("player scores %v", scores)
