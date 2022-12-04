@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/csv"
+	"flag"
 	"fmt"
 	"io"
 	"log"
@@ -26,13 +27,18 @@ type finalScore struct {
 }
 
 func main() {
+	filepath := flag.String("path", "./mtgscores.csv", "path to analyze with tracker")
+	flag.Parse()
+
+	log.Printf("analyzing scores for %s", *filepath)
+
 	elo := elogo.NewElo()
 	elo.D = 800
 	elo.K = 40
 
 	scores := map[string]int{}
 
-	f, err := os.Open("mtgscores.csv")
+	f, err := os.Open(*filepath)
 	if err != nil {
 		log.Fatalf("failed to open scores: %v", err)
 	}
@@ -47,12 +53,16 @@ func main() {
 		}
 
 		players := rec[2:]
+		log.Printf("comparing players: %s", players)
+
 		currentGame := []string{}
 		for _, player := range players {
 			player = strings.TrimSpace(player)
 			if player == "" {
 
 				// score the game once we've assembled it.
+				log.Printf("attempting to score game: %+v - %+v", scores, currentGame)
+
 				err := ScoreGame(elo, scores, currentGame)
 				if err != nil {
 					log.Fatalf("failed to score game: %v", err)
