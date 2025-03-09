@@ -28,6 +28,7 @@ type finalScore struct {
 
 func main() {
 	filepath := flag.String("path", "./mtgscores.csv", "path to analyze with tracker")
+	useTUI := flag.Bool("tui", false, "use terminal UI for displaying rankings")
 	flag.Parse()
 
 	log.Printf("analyzing scores for %s", *filepath)
@@ -91,8 +92,14 @@ func main() {
 	})
 
 	// print out final scores
-	for i, v := range finalScores {
-		fmt.Printf("%d --- %s --- %d\n", i, v.player, v.eloScore)
+	if *useTUI {
+		// Use the TUI to display rankings
+		DisplayRankingsTUI(finalScores)
+	} else {
+		// Use the original console output
+		for i, v := range finalScores {
+			fmt.Printf("%d --- %s --- %d\n", i, v.player, v.eloScore)
+		}
 	}
 
 	// log.Printf("player scores %v", scores)
