@@ -96,7 +96,7 @@ func processGamesFromFile(filepath string, window int) ([]finalScore, error) {
 		}
 
 		players := rec[5:] // Player rankings start at column 5 (1st Place, 2nd Place, etc.)
-		
+
 		// Process the entire row as one complete game
 		currentGame := []string{}
 		seen := make(map[string]bool)

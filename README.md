@@ -9,6 +9,7 @@ Game Analysis Tool is a Go application that calculates and tracks player ranking
 - **Elo Rating Calculation**: Implements the Elo rating system to provide an objective measure of player skill
 - **CSV Data Processing**: Reads game records from a CSV file to calculate ratings
 - **Player Performance Tracking**: Maintains and updates player ratings based on game outcomes
+- **Rolling Window Analysis**: Analyze only the most recent N games for current performance trends
 - **Flexible Input**: Supports a variety of game formats where players are ranked from winner to losers
 - **Terminal User Interface**: View rankings in an interactive TUI with navigation controls
 
@@ -47,7 +48,25 @@ go build
 
 # Display rankings with Terminal User Interface
 ./game-analysis -tui
+
+# Analyze only the last 10 games for recent performance trends
+./game-analysis -path=path/to/your/data.csv -window=10
+
+# Analyze only the last 5 games
+./game-analysis -window=5
+
+# Analyze all games (default behavior)
+./game-analysis -window=0
 ```
+
+### Command Line Options
+
+- `-path`: Specify the path to your CSV file (default: "mtgscores.csv")
+- `-tui`: Enable Terminal User Interface for interactive ranking display
+- `-window`: Number of most recent games to analyze (default: 0 = all games)
+  - Use `-window=N` where N > 0 to analyze only the last N games
+  - Use `-window=0` to analyze all games (default behavior)
+  - Rolling window analysis is useful for tracking recent performance trends
 
 ### Terminal User Interface
 
@@ -78,9 +97,24 @@ Where:
 The application:
 
 1. Reads the game data from the specified CSV file
-2. Initializes each player with a base Elo rating
-3. For each game, updates player ratings based on their performance
-4. Calculates and displays the final Elo ratings for all players
+2. If a rolling window is specified (`-window=N`), selects only the last N games
+3. Initializes each player with a base Elo rating
+4. For each game (or windowed subset), updates player ratings based on their performance using pairwise comparisons
+5. Calculates and displays the final Elo ratings for all players
+
+### Rolling Window Analysis
+
+The rolling window feature allows you to focus on recent performance by analyzing only the most recent games:
+
+- **All Games** (`-window=0`): Analyzes all games in the dataset for overall historical performance
+- **Recent Performance** (`-window=N`): Analyzes only the last N games to see current form and trends
+- **Use Cases**:
+  - Track improvement or decline in recent games
+  - Compare current performance vs. historical performance
+  - Identify hot streaks or cold streaks
+  - Focus on relevant recent meta changes
+
+Example: If you have 100 games total and use `-window=10`, only games 91-100 will be analyzed.
 
 ## Contributing
 
