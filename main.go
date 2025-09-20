@@ -14,12 +14,7 @@ import (
 )
 
 // The default starting score of players in our analyzer.
-var defaultStartingScore = 1500
-
-type currentGame struct {
-	winner string
-	loser  string
-}
+const defaultStartingScore = 1500
 
 type finalScore struct {
 	player   string
@@ -27,131 +22,115 @@ type finalScore struct {
 }
 
 func main() {
-	filepath := flag.String("path", "./mtgscores.csv", "path to analyze with tracker")
+	path := flag.String("path", "./mtgscores.csv", "path to analyze with tracker")
 	useTUI := flag.Bool("tui", false, "use terminal UI for displaying rankings")
 	flag.Parse()
 
-	log.Printf("analyzing scores for %s", *filepath)
+	log.Printf("Analyzing scores for %s", *path)
 
+	elo := initializeElo()
+	scores := make(map[string]int)
+
+	if err := processScores(*path, elo, scores); err != nil {
+		log.Fatalf("Error processing scores: %v", err)
+	}
+
+	finalScores := calculateFinalScores(scores)
+	displayScores(finalScores, *useTUI)
+}
+
+func initializeElo() *elogo.Elo {
 	elo := elogo.NewElo()
 	elo.D = 800
 	elo.K = 40
+	return elo
+}
 
-	scores := map[string]int{}
-
-	f, err := os.Open(*filepath)
+func processScores(path string, elo *elogo.Elo, scores map[string]int) error {
+	file, err := os.Open(path)
 	if err != nil {
-		log.Fatalf("failed to open scores: %v", err)
+		return fmt.Errorf("failed to open scores file: %w", err)
 	}
-	reader := csv.NewReader(f)
+	defer file.Close()
+
+	reader := csv.NewReader(file)
 	for {
-		rec, err := reader.Read()
+		record, err := reader.Read()
 		if err != nil {
 			if err == io.EOF {
 				break
 			}
-			log.Fatalf("error processing record: %v", err)
+			return fmt.Errorf("error reading record: %w", err)
 		}
 
-		players := rec[2:]
-		log.Printf("comparing players: %s", players)
+		if len(record) < 3 {
+			continue
+		}
 
-		currentGame := []string{}
-		for _, player := range players {
-			player = strings.TrimSpace(player)
-			if player == "" {
-
-				// score the game once we've assembled it.
-				log.Printf("attempting to score game: %+v - %+v", scores, currentGame)
-
-				err := ScoreGame(elo, scores, currentGame)
-				if err != nil {
-					log.Fatalf("failed to score game: %v", err)
-				}
-
-				break
+		game := parseGame(record[2:])
+		if len(game) >= 2 {
+			if err := scoreGame(elo, scores, game); err != nil {
+				return fmt.Errorf("failed to score game: %w", err)
 			}
-
-			currentGame = append(currentGame, player)
 		}
 	}
-
-	// build final scores list
-	finalScores := []finalScore{}
-	for k, v := range scores {
-		fs := finalScore{
-			player:   k,
-			eloScore: v,
-		}
-		finalScores = append(finalScores, fs)
-	}
-
-	// sort in descending order
-	sort.Slice(finalScores, func(i int, j int) bool {
-		return finalScores[i].eloScore > finalScores[j].eloScore
-	})
-
-	// print out final scores
-	if *useTUI {
-		// Use the TUI to display rankings
-		DisplayRankingsTUI(finalScores)
-	} else {
-		// Use the original console output
-		for i, v := range finalScores {
-			fmt.Printf("%d --- %s --- %d\n", i, v.player, v.eloScore)
-		}
-	}
-
-	// log.Printf("player scores %v", scores)
+	return nil
 }
 
-// ScoreGame iterates over a game and updates scores in the playerMap accordingly
-func ScoreGame(elo *elogo.Elo, scores map[string]int, game []string) error {
-	numPlayers := len(game)
-	if numPlayers < 2 {
-		return fmt.Errorf("invalid game")
-	}
-
-	for place := range game {
-		if place == numPlayers-1 {
-			// last place
+func parseGame(players []string) []string {
+	game := make([]string, 0, len(players))
+	for _, player := range players {
+		player = strings.TrimSpace(player)
+		if player == "" {
 			break
 		}
+		game = append(game, player)
+	}
+	return game
+}
 
-		// get player names
-		playerA := game[place]
-		playerB := game[place+1]
+func scoreGame(elo *elogo.Elo, scores map[string]int, game []string) error {
+	numPlayers := len(game)
+	if numPlayers < 2 {
+		return fmt.Errorf("invalid game: need at least 2 players, got %d", numPlayers)
+	}
 
-		// get player scores from our score map
-		_, ok := scores[playerA]
-		if !ok {
+	for i := 0; i < numPlayers-1; i++ {
+		playerA, playerB := game[i], game[i+1]
+
+		if _, exists := scores[playerA]; !exists {
 			scores[playerA] = defaultStartingScore
 		}
-
-		_, ok = scores[playerB]
-		if !ok {
+		if _, exists := scores[playerB]; !exists {
 			scores[playerB] = defaultStartingScore
 		}
 
-		// get ranks after we've assured defaults
-		rankA := scores[playerA]
-		rankB := scores[playerB]
-
-		// check existence of player in map and set default score if they don't exist
-		// log.Printf("comparing ranks %s - %d to %s - %d", playerA, rankA, playerB, rankB)
-
-		// Results for A in the outcome of A defeats B
-		score := 1                                             // Use 1 in case A wins, 0 in case B wins, 0.5 in case of a draw
-		delta := elo.RatingDelta(rankA, rankB, float64(score)) // 20
-		// log.Printf("rating delta between %s and %s: %d", playerA, playerB, delta)
-
-		updatedRating := elo.Rating(rankA, rankB, float64(score)) // 1520
-
-		scores[playerA] = updatedRating
-		// log.Printf("updated %s score: %d", playerA, scores[playerA])
-
-		scores[playerB] = scores[playerB] - delta
-		// log.Printf("updated %s score: %d", playerB, scores[playerB])
+		scores[playerA] = elo.Rating(scores[playerA], scores[playerB], 1.0)
+		scores[playerB] = elo.Rating(scores[playerB], scores[playerA], 0.0)
 	}
 	return nil
+}
+
+func calculateFinalScores(scores map[string]int) []finalScore {
+	finalScores := make([]finalScore, 0, len(scores))
+	for player, eloScore := range scores {
+		finalScores = append(finalScores, finalScore{player: player, eloScore: eloScore})
+	}
+
+	sort.Slice(finalScores, func(i, j int) bool {
+		return finalScores[i].eloScore > finalScores[j].eloScore
+	})
+
+	return finalScores
+}
+
+func displayScores(finalScores []finalScore, useTUI bool) {
+	if useTUI {
+		DisplayRankingsTUI(finalScores)
+		return
+	}
+
+	for i, score := range finalScores {
+		fmt.Printf("%d --- %s --- %d\n", i+1, score.player, score.eloScore)
+	}
 }

@@ -5,32 +5,28 @@ import (
 	"strconv"
 
 	"github.com/charmbracelet/bubbles/table"
-	"github.com/charmbracelet/bubbletea"
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 )
 
 // Styles
 var (
 	titleStyle = lipgloss.NewStyle().
-		Foreground(lipgloss.Color("#FFFDF5")).
-		Background(lipgloss.Color("#25A065")).
-		Padding(0, 1).
-		Bold(true).
-		MarginBottom(1).
-		Width(60).
-		Align(lipgloss.Center)
+			Foreground(lipgloss.Color("#FFFDF5")).
+			Background(lipgloss.Color("#25A065")).
+			Padding(0, 1).
+			Bold(true).
+			MarginBottom(1).
+			Width(60).
+			Align(lipgloss.Center)
 
 	footerStyle = lipgloss.NewStyle().
-		Foreground(lipgloss.Color("#FFFDF5")).
-		Background(lipgloss.Color("#666666")).
-		Padding(0, 1).
-		MarginTop(1).
-		Width(60).
-		Align(lipgloss.Center)
-
-	baseStyle = lipgloss.NewStyle().
-		BorderStyle(lipgloss.NormalBorder()).
-		BorderForeground(lipgloss.Color("240"))
+			Foreground(lipgloss.Color("#FFFDF5")).
+			Background(lipgloss.Color("#666666")).
+			Padding(0, 1).
+			MarginTop(1).
+			Width(60).
+			Align(lipgloss.Center)
 )
 
 // Model represents the Bubbletea model for our TUI
@@ -127,4 +123,3 @@ func min(a, b int) int {
 	}
 	return b
 }
-
