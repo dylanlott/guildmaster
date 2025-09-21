@@ -1,8 +1,21 @@
-# Game Analysis Tool
+# guildmaster
+
+```text
+                     ▄▄    ▄▄         ▄▄                                                        
+                     ██  ▀███       ▀███                                   ██                   
+                           ██         ██                                   ██                   
+ ▄█▀████████  ▀███ ▀███    ██    ▄█▀▀███ ▀████████▄█████▄  ▄█▀██▄  ▄██▀████████  ▄▄█▀██▀███▄███ 
+▄██  ██   ██    ██   ██    ██  ▄██    ██   ██    ██    ██ ██   ██  ██   ▀▀ ██   ▄█▀   ██ ██▀ ▀▀ 
+▀█████▀   ██    ██   ██    ██  ███    ██   ██    ██    ██  ▄█████  ▀█████▄ ██   ██▀▀▀▀▀▀ ██     
+██        ██    ██   ██    ██  ▀██    ██   ██    ██    ██ ██   ██  █▄   ██ ██   ██▄    ▄ ██     
+ ███████  ▀████▀███▄████▄▄████▄ ▀████▀███▄████  ████  ████▄████▀██▄██████▀ ▀████ ▀█████▀████▄   
+█▀     ██                                                                                       
+██████▀                                                                                         
+```
 
 ## Overview
 
-Game Analysis Tool is a Go application that calculates and tracks player rankings using the Elo rating system. The tool is designed to analyze game results (particularly Magic: The Gathering games) from CSV data and provide statistical insights about player performance over time.
+Guildmaster is a Go application that calculates and tracks player rankings using the Elo rating system. The tool is designed to analyze game results (particularly Magic: The Gathering games) from CSV data and provide statistical insights about player performance over time.
 
 ## Features
 
@@ -14,7 +27,7 @@ Game Analysis Tool is a Go application that calculates and tracks player ranking
 
 ## Requirements
 
-- Go 1.17 or higher
+- Go 1.25 or higher
 - Dependencies:
   - github.com/kortemy/elo-go
 

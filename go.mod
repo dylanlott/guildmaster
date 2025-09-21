@@ -1,6 +1,6 @@
-module github.com/dylanlott/game-analysis
+module github.com/dylanlott/guildmaster
 
-go 1.17
+go 1.25
 
 require (
 	github.com/charmbracelet/bubbles v0.20.0
