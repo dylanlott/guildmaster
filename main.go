@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"math"
 	"os"
 	"sort"
 	"strings"
@@ -115,25 +116,44 @@ func scoreGame(elo *elogo.Elo, scores map[string]int, game []string) error {
 		return fmt.Errorf("invalid game: need at least 2 players, got %d", numPlayers)
 	}
 
-	for i := 0; i < numPlayers-1; i++ {
-		playerA, playerB := game[i], game[i+1]
-
-		if _, exists := scores[playerA]; !exists {
-			scores[playerA] = defaultStartingScore
+	// Ensure all players have a starting score and capture snapshot ratings.
+	ratings := make([]float64, numPlayers)
+	for i := 0; i < numPlayers; i++ {
+		name := game[i]
+		if _, exists := scores[name]; !exists {
+			scores[name] = defaultStartingScore
 		}
-		if _, exists := scores[playerB]; !exists {
-			scores[playerB] = defaultStartingScore
+		ratings[i] = float64(scores[name])
+	}
+
+	// Accumulate Elo deltas based on all pairwise outcomes from the snapshot.
+	deltas := make([]float64, numPlayers)
+	K := float64(elo.K)
+	D := float64(elo.D)
+	for i := range numPlayers {
+		for j := i + 1; j < numPlayers; j++ {
+			// Player at index i placed higher than player at index j, so i wins vs j.
+			RA := ratings[i]
+			RB := ratings[j]
+
+			// Expected score of A vs B
+			EA := 1.0 / (1.0 + math.Pow(10, (RB-RA)/D))
+
+			// Single-game deltas
+			deltaA := K * (1.0 - EA) // A wins
+			deltaB := -deltaA        // B loses
+
+			// Apply deltas
+			deltas[i] += deltaA
+			deltas[j] += deltaB
 		}
+	}
 
-		// Snapshot ratings before updating to avoid order-dependent updates.
-		rankA := scores[playerA]
-		rankB := scores[playerB]
-
-		newA := elo.Rating(rankA, rankB, 1.0)
-		newB := elo.Rating(rankB, rankA, 0.0)
-
-		scores[playerA] = newA
-		scores[playerB] = newB
+	// Apply accumulated deltas.
+	for i := range numPlayers {
+		name := game[i]
+		newRating := int(math.Round(ratings[i] + deltas[i]))
+		scores[name] = newRating
 	}
 	return nil
 }
