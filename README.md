@@ -17,6 +17,8 @@
 
 Guildmaster is a lightweight Go application that calculates and tracks player rankings using the Elo rating system. The tool reads game results (particularly Magic: The Gathering games) from CSV data and computes updated ratings using a pairwise Elo scoring method suitable for multiplayer ranked games.
 
+![tui](assets/tui.png)
+
 ## Features
 
 - **Elo Rating Calculation**: Implements the Elo rating system to provide an objective measure of player skill
