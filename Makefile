@@ -18,6 +18,10 @@ run:
 tui: 
 	go run . -tui
 
+# Run the http server
+server:
+	go run ./cmd/server
+
 # Format the code
 fmt:
 	go fmt ./...

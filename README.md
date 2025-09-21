@@ -120,6 +120,27 @@ Where:
 - The second column contains the date
 - The remaining columns list players in finishing order (winner to losers)
 
+## Web server
+
+A small HTTP server is provided under `cmd/server`. It exposes a tiny REST API and serves static files from the `assets/` directory.
+
+Endpoints:
+
+- `GET /api/scores`  -> returns current scores as JSON
+
+- `POST /api/game`  -> accepts `{"players": ["A","B",...]}`, computes Elo deltas and persists them in-memory
+
+Run the server locally:
+
+```bash
+# from the project root
+make server
+# or
+go run ./cmd/server
+```
+
+Open `http://localhost:8080` to view the minimal web UI (`assets/index.html`).
+
 ## How It Works
 
 The application:
