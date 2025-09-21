@@ -15,6 +15,9 @@ build:
 run:
 	go run .
 
+tui: 
+	go run . -tui
+
 # Format the code
 fmt:
 	go fmt ./...

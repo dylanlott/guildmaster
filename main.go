@@ -26,17 +26,37 @@ func main() {
 	useTUI := flag.Bool("tui", false, "use terminal UI for displaying rankings")
 	flag.Parse()
 
+	// Suppress logs during TUI mode to prevent interference with display
+	if *useTUI {
+		log.SetOutput(io.Discard)
+	}
+
 	log.Printf("Analyzing scores for %s", *path)
 
 	elo := initializeElo()
 	scores := make(map[string]int)
 
 	if err := processScores(*path, elo, scores); err != nil {
+		if *useTUI {
+			log.SetOutput(os.Stderr) // Restore for error display
+		}
 		log.Fatalf("Error processing scores: %v", err)
 	}
 
 	finalScores := calculateFinalScores(scores)
-	displayScores(finalScores, *useTUI)
+
+	if *useTUI {
+		// Use the TUI to display rankings
+		if err := DisplayRankingsTUI(finalScores); err != nil {
+			log.SetOutput(os.Stderr) // Restore log output to show errors
+			log.Fatalf("Error in TUI: %v", err)
+		}
+	} else {
+		// Use the original console output
+		for i, v := range finalScores {
+			fmt.Printf("%d --- %s --- %d\n", i+1, v.player, v.eloScore)
+		}
+	}
 }
 
 func initializeElo() *elogo.Elo {
@@ -105,8 +125,15 @@ func scoreGame(elo *elogo.Elo, scores map[string]int, game []string) error {
 			scores[playerB] = defaultStartingScore
 		}
 
-		scores[playerA] = elo.Rating(scores[playerA], scores[playerB], 1.0)
-		scores[playerB] = elo.Rating(scores[playerB], scores[playerA], 0.0)
+		// Snapshot ratings before updating to avoid order-dependent updates.
+		rankA := scores[playerA]
+		rankB := scores[playerB]
+
+		newA := elo.Rating(rankA, rankB, 1.0)
+		newB := elo.Rating(rankB, rankA, 0.0)
+
+		scores[playerA] = newA
+		scores[playerB] = newB
 	}
 	return nil
 }
@@ -117,20 +144,15 @@ func calculateFinalScores(scores map[string]int) []finalScore {
 		finalScores = append(finalScores, finalScore{player: player, eloScore: eloScore})
 	}
 
-	sort.Slice(finalScores, func(i, j int) bool {
+	// Deterministic ordering: stable sort by Elo desc, then player name asc as tiebreaker.
+	sort.SliceStable(finalScores, func(i, j int) bool {
+		if finalScores[i].eloScore == finalScores[j].eloScore {
+			return finalScores[i].player < finalScores[j].player
+		}
 		return finalScores[i].eloScore > finalScores[j].eloScore
 	})
 
 	return finalScores
 }
 
-func displayScores(finalScores []finalScore, useTUI bool) {
-	if useTUI {
-		DisplayRankingsTUI(finalScores)
-		return
-	}
-
-	for i, score := range finalScores {
-		fmt.Printf("%d --- %s --- %d\n", i+1, score.player, score.eloScore)
-	}
-}
+// displayScores was previously used for console output; removed to avoid unused warnings.

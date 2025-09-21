@@ -11,21 +11,29 @@ import (
 
 // Styles
 var (
+	colors = struct {
+		primary    lipgloss.Color
+		secondary  lipgloss.Color
+		background lipgloss.Color
+	}{
+		primary:    lipgloss.Color("#25A065"),
+		secondary:  lipgloss.Color("#666666"),
+		background: lipgloss.Color("#FFFDF5"),
+	}
+
 	titleStyle = lipgloss.NewStyle().
-			Foreground(lipgloss.Color("#FFFDF5")).
-			Background(lipgloss.Color("#25A065")).
-			Padding(0, 1).
+			Foreground(colors.background).
+			Background(colors.primary).
+			Padding(0, 2).
 			Bold(true).
 			MarginBottom(1).
-			Width(60).
 			Align(lipgloss.Center)
 
 	footerStyle = lipgloss.NewStyle().
-			Foreground(lipgloss.Color("#FFFDF5")).
-			Background(lipgloss.Color("#666666")).
+			Foreground(colors.background).
+			Background(colors.secondary).
 			Padding(0, 1).
 			MarginTop(1).
-			Width(60).
 			Align(lipgloss.Center)
 )
 
@@ -36,9 +44,7 @@ type Model struct {
 }
 
 // Init initializes the model
-func (m Model) Init() tea.Cmd {
-	return nil
-}
+func (m Model) Init() tea.Cmd { return nil }
 
 // Update handles key events
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -60,7 +66,6 @@ func (m Model) View() string {
 	title := titleStyle.Render("Player Rankings")
 	footer := footerStyle.Render("Press q or Ctrl+C to quit")
 	tableView := m.table.View()
-
 	return fmt.Sprintf("%s\n%s\n%s", title, tableView, footer)
 }
 
@@ -102,13 +107,8 @@ func DisplayRankingsTUI(finalScores []finalScore) error {
 		Bold(true)
 	t.SetStyles(s)
 
-	// Create model
-	m := Model{
-		table:  t,
-		scores: finalScores,
-	}
-
-	// Run the program
+	// Create model and run program
+	m := Model{table: t, scores: finalScores}
 	p := tea.NewProgram(m)
 	if _, err := p.Run(); err != nil {
 		return fmt.Errorf("error running TUI: %v", err)
