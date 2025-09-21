@@ -34,6 +34,14 @@ func (s *Store) Set(player string, score int) {
 	s.scores[player] = score
 }
 
+// ReplaceAll atomically replaces the entire scores map with the provided snapshot.
+func (s *Store) ReplaceAll(newScores map[string]int) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.scores = make(map[string]int, len(newScores))
+	maps.Copy(s.scores, newScores)
+}
+
 // ApplyDeltas applies integer deltas to players (adds delta to existing or default 1500).
 func (s *Store) ApplyDeltas(deltas map[string]int) {
 	s.mu.Lock()

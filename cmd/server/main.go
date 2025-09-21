@@ -20,6 +20,7 @@ func main() {
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/api/scores", srv.HandleGetScores)
+	mux.HandleFunc("/api/refresh", srv.HandleRefresh)
 	mux.HandleFunc("/api/games", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case http.MethodGet:
@@ -33,6 +34,11 @@ func main() {
 	mux.HandleFunc("/", srv.HandleLanding)
 	fs := http.FileServer(http.Dir(*staticDir))
 	mux.Handle("/static/", http.StripPrefix("/static/", fs))
+
+	// initial refresh to populate in-memory scores (ignore errors; landing page computes on the fly if needed)
+	if err := srv.RefreshAndPersistScores(); err != nil {
+		log.Printf("initial refresh failed: %v", err)
+	}
 
 	log.Printf("listening on %s, serving static from %s", *addr, *staticDir)
 	if err := http.ListenAndServe(*addr, mux); err != nil {
