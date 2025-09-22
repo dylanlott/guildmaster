@@ -1,3 +1,4 @@
 mtgscores*
 .DS_Store
 guildmaster
+.env
