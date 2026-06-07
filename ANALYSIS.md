@@ -53,13 +53,23 @@ The `ScoreGame` logic is nearly identical in three places:
 
 This should be consolidated into a single canonical implementation.
 
-### 3. No Persistence
-The server's scoring store is **in-memory only**. All computed ratings reset on restart. There's no database or file-based persistence layer.
+### 3. Persistence Exists Now
+The server now uses **SQLite** for durable persistence. Scores, games, users, sessions, pods, and pod membership survive restarts.
 
 ### 4. Google Sheets Integration
 `internal/server/sheets.go` is the bridge between the web server and live game data. Requires a Google service account or OAuth credentials configured via environment variables (see `.env.example`).
 
-### 5. TUI
+### 5. Auth Model
+Guildmaster now has real browser auth:
+
+- username/password accounts
+- persistent session cookies
+- roles: `member`, `admin`, `owner`
+- CSRF protection on session-authenticated POSTs
+- a fallback bearer admin key for automation
+- owner-managed role administration at `/admin/users`
+
+### 6. TUI
 Built with the **Charmbracelet** stack (bubbletea + bubbles + lipgloss). Displays a ranked leaderboard with arrow key navigation. Implemented in both `tui.go` (root) and `internal/analyzer/tui.go` — another instance of duplication.
 
 ---
@@ -68,10 +78,11 @@ Built with the **Charmbracelet** stack (bubbletea + bubbles + lipgloss). Display
 
 | Component | Library/Tool |
 |---|---|
-| Language | Go 1.25 |
+| Language | Go 1.26 |
 | Elo engine | `github.com/kortemy/elo-go` |
 | TUI | Charmbracelet (bubbletea, bubbles, lipgloss) |
 | Sheets API | `google.golang.org/api` |
+| Persistence | SQLite via `modernc.org/sqlite` |
 | Build | Make |
 | Deploy | Docker / docker-compose |
 
