@@ -44,6 +44,7 @@ func main() {
 	mux.HandleFunc("/register", srv.HandleRegister)
 	mux.HandleFunc("/login", srv.HandleLogin)
 	mux.HandleFunc("/logout", srv.HandleLogout)
+	mux.HandleFunc("/admin/users", srv.HandleAdminUsers)
 	mux.HandleFunc("/pods/new", srv.RequireAuth(srv.HandlePodNew))
 	mux.HandleFunc("/pods/", srv.HandlePods)
 	mux.HandleFunc("/pods", srv.HandlePods)

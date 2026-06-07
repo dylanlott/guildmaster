@@ -2,6 +2,7 @@ package db
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"time"
 
@@ -125,6 +126,8 @@ type PodLeaderboardRow struct {
 	Wins    int     `json:"wins"`
 	WinRate float64 `json:"win_rate"`
 }
+
+var ErrLastOwner = errors.New("cannot remove the last owner")
 
 var schemaMigrations = []migration{
 	{
@@ -751,6 +754,66 @@ WHERE id = ?
 		return nil, fmt.Errorf("get user by id: %w", err)
 	}
 	return &user, nil
+}
+
+func (s *Store) ListUsers() ([]User, error) {
+	rows, err := s.db.Query(`
+SELECT id, username, display_name, role, password_hash, global_elo, created_at
+FROM users
+ORDER BY created_at ASC, id ASC
+`)
+	if err != nil {
+		return nil, fmt.Errorf("list users query: %w", err)
+	}
+	defer rows.Close()
+
+	users := make([]User, 0)
+	for rows.Next() {
+		var user User
+		if err := rows.Scan(&user.ID, &user.Username, &user.DisplayName, &user.Role, &user.PasswordHash, &user.GlobalElo, &user.CreatedAt); err != nil {
+			return nil, fmt.Errorf("scan user row: %w", err)
+		}
+		users = append(users, user)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("iterate user rows: %w", err)
+	}
+	return users, nil
+}
+
+func (s *Store) UpdateUserRole(userID int64, role string) error {
+	tx, err := s.db.Begin()
+	if err != nil {
+		return fmt.Errorf("begin update user role transaction: %w", err)
+	}
+	defer func() { _ = tx.Rollback() }()
+
+	var currentRole string
+	err = tx.QueryRow(`SELECT role FROM users WHERE id = ?`, userID).Scan(&currentRole)
+	if err == sql.ErrNoRows {
+		return nil
+	}
+	if err != nil {
+		return fmt.Errorf("load current user role: %w", err)
+	}
+
+	if currentRole == "owner" && role != "owner" {
+		var ownerCount int
+		if err := tx.QueryRow(`SELECT COUNT(*) FROM users WHERE role = 'owner'`).Scan(&ownerCount); err != nil {
+			return fmt.Errorf("count owners: %w", err)
+		}
+		if ownerCount <= 1 {
+			return ErrLastOwner
+		}
+	}
+
+	if _, err := tx.Exec(`UPDATE users SET role = ? WHERE id = ?`, role, userID); err != nil {
+		return fmt.Errorf("update user role: %w", err)
+	}
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("commit update user role transaction: %w", err)
+	}
+	return nil
 }
 
 func (s *Store) CreateSession(userID int64, token string, expiresAt time.Time) error {

@@ -411,6 +411,7 @@
         <a href="/games">Game History</a>
         <a href="/pods">Pods</a>
         <a href="/submit">Submit Game</a>
+        {{ if .Nav.CanAdmin }}<a href="/admin/users">Users</a>{{ end }}
         <div class="nav-right">
         {{ if .Nav.LoggedIn }}
           <span class="muted">@{{ .Nav.Username }}</span>

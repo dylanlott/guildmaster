@@ -83,6 +83,66 @@ func TestGetPlayerStats(t *testing.T) {
 	assertStats(t, stats["Cara"], 2, 0, 0.0, 3.0)
 }
 
+func TestListUsersAndUpdateUserRole(t *testing.T) {
+	store, err := NewStore("file:guildmaster_users_test?mode=memory&cache=shared")
+	if err != nil {
+		t.Fatalf("NewStore() failed: %v", err)
+	}
+	defer func() { _ = store.Close() }()
+
+	owner, err := store.CreateUser("owner", "Owner", "hash")
+	if err != nil {
+		t.Fatalf("CreateUser(owner) failed: %v", err)
+	}
+	admin, err := store.CreateUser("admin", "Admin", "hash")
+	if err != nil {
+		t.Fatalf("CreateUser(admin) failed: %v", err)
+	}
+
+	if err := store.UpdateUserRole(admin.ID, "admin"); err != nil {
+		t.Fatalf("UpdateUserRole(admin) failed: %v", err)
+	}
+
+	users, err := store.ListUsers()
+	if err != nil {
+		t.Fatalf("ListUsers() failed: %v", err)
+	}
+	if len(users) != 2 {
+		t.Fatalf("expected 2 users, got %d", len(users))
+	}
+	if users[0].ID != owner.ID || users[0].Role != "owner" {
+		t.Fatalf("unexpected first user: %#v", users[0])
+	}
+	if users[1].ID != admin.ID || users[1].Role != "admin" {
+		t.Fatalf("unexpected second user: %#v", users[1])
+	}
+}
+
+func TestUpdateUserRolePreventsRemovingLastOwner(t *testing.T) {
+	store, err := NewStore("file:guildmaster_last_owner_test?mode=memory&cache=shared")
+	if err != nil {
+		t.Fatalf("NewStore() failed: %v", err)
+	}
+	defer func() { _ = store.Close() }()
+
+	owner, err := store.CreateUser("owner", "Owner", "hash")
+	if err != nil {
+		t.Fatalf("CreateUser(owner) failed: %v", err)
+	}
+
+	if err := store.UpdateUserRole(owner.ID, "admin"); err == nil {
+		t.Fatalf("expected last owner demotion to fail")
+	}
+
+	reloaded, err := store.GetUserByID(owner.ID)
+	if err != nil {
+		t.Fatalf("GetUserByID(owner) failed: %v", err)
+	}
+	if reloaded.Role != "owner" {
+		t.Fatalf("expected last owner to remain owner, got %q", reloaded.Role)
+	}
+}
+
 func TestPodStoreMethodsAndRecordPodGame(t *testing.T) {
 	store, err := NewStore("file:guildmaster_pods_test?mode=memory&cache=shared")
 	if err != nil {
