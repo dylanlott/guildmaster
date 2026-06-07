@@ -1,0 +1,4 @@
+id,date,table_zap,draw_game,notes,p1,p2,p3,p4
+g1,"Mon, 02 Jan 2006 15:04:05 MST",zap,,n/a, Alice ,Bob,Carol,
+g2,"Mon, 02 Jan 2006 16:04:05 MST",,draw,n/a,TeamOne/TeamTwo,Eve,,
+g3,not-a-date,,,n/a,Dan, Erin ,,

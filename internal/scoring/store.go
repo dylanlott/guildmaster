@@ -2,15 +2,27 @@ package scoring
 
 import (
 	"errors"
-	"maps"
 	"math"
 	"sync"
+)
+
+const (
+	DefaultStartingScore = 1500
+	DefaultK             = 40
+	DefaultD             = 800.0
 )
 
 // Simple in-memory scoring store for player Elo ratings.
 type Store struct {
 	mu     sync.RWMutex
 	scores map[string]int
+}
+
+// SnapshotStore is the minimal score store contract used by the server.
+// Store satisfies this interface and other backends can adopt it as needed.
+type SnapshotStore interface {
+	GetAll() map[string]int
+	ReplaceAll(map[string]int)
 }
 
 // NewStore creates a new in-memory store.
@@ -23,7 +35,9 @@ func (s *Store) GetAll() map[string]int {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 	out := make(map[string]int, len(s.scores))
-	maps.Copy(out, s.scores)
+	for k, v := range s.scores {
+		out[k] = v
+	}
 	return out
 }
 
@@ -39,21 +53,21 @@ func (s *Store) ReplaceAll(newScores map[string]int) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.scores = make(map[string]int, len(newScores))
-	maps.Copy(s.scores, newScores)
+	for k, v := range newScores {
+		s.scores[k] = v
+	}
 }
 
 // ApplyDeltas applies integer deltas to players (adds delta to existing or default 1500).
 func (s *Store) ApplyDeltas(deltas map[string]int) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	const defaultStartingScore = 1500
-	for player, delta := range deltas {
-		cur, ok := s.scores[player]
-		if !ok {
-			cur = defaultStartingScore
-		}
-		s.scores[player] = cur + delta
-	}
+	applyDeltas(s.scores, deltas)
+}
+
+// ApplyDeltas mutates a snapshot of absolute ratings using integer deltas.
+func ApplyDeltas(snapshot map[string]int, deltas map[string]int) {
+	applyDeltas(snapshot, deltas)
 }
 
 // ScoreGame computes Elo deltas for a finished game (players ordered by finish: winner first).
@@ -69,7 +83,7 @@ func ScoreGame(game []string, K int, D float64, snapshot map[string]int) (map[st
 		if v, ok := snapshot[game[i]]; ok {
 			ratings[i] = float64(v)
 		} else {
-			ratings[i] = 1500.0
+			ratings[i] = float64(DefaultStartingScore)
 		}
 	}
 
@@ -90,4 +104,14 @@ func ScoreGame(game []string, K int, D float64, snapshot map[string]int) (map[st
 		deltas[game[i]] = int(math.Round(deltasF[i]))
 	}
 	return deltas, nil
+}
+
+func applyDeltas(snapshot map[string]int, deltas map[string]int) {
+	for player, delta := range deltas {
+		cur, ok := snapshot[player]
+		if !ok {
+			cur = DefaultStartingScore
+		}
+		snapshot[player] = cur + delta
+	}
 }

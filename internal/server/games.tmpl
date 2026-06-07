@@ -5,10 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" href="https://fav.farm/👑" />
     <link rel="apple-touch-icon" href="https://fav.farm/👑" />
-    <title>Guildmaster 👑 - Leaderboard</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <title>Guildmaster - Game History</title>
             <style>
       :root {
         --bg: #09090b;
@@ -47,29 +44,24 @@
 
       body {
         margin: 0;
-        font-family: 'Manrope', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+        font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
         background:
-          radial-gradient(120% 80% at 15% -10%, rgba(247, 209, 38, .11) 0%, transparent 48%),
-          radial-gradient(80% 60% at 100% 0%, rgba(255,255,255,.045) 0%, transparent 60%),
-          linear-gradient(180deg, #0b0b0f 0%, #09090b 46%, #070709 100%);
+          radial-gradient(120% 80% at 15% -10%, #17171b 0%, transparent 55%),
+          radial-gradient(80% 60% at 100% 0%, #121218 0%, transparent 60%),
+          var(--bg);
         color: var(--text);
         line-height: 1.5;
       }
 
       .container {
-        max-width: 1180px;
+        max-width: 1100px;
         margin: 0 auto;
-        padding: 2rem 1rem 3rem;
+        padding: 2rem 1rem 2.8rem;
       }
 
       h1, h2, h3 {
         color: var(--text);
         letter-spacing: -0.02em;
-      }
-
-      .display {
-        font-family: 'Cinzel', Georgia, serif;
-        letter-spacing: .03em;
       }
 
       a {
@@ -358,163 +350,16 @@
       .error, .danger { color: var(--negative); }
       .error { margin: .5rem 0 0; min-height: 1.2rem; }
 
-      .hero {
-        position: relative;
-        overflow: hidden;
-        border: 1px solid rgba(247,209,38,.18);
-        border-radius: 22px;
-        padding: 1.35rem;
-        margin-bottom: 1rem;
-        background:
-          radial-gradient(circle at top right, rgba(247,209,38,.2), transparent 32%),
-          linear-gradient(145deg, rgba(255,255,255,.03), rgba(255,255,255,.01)),
-          linear-gradient(180deg, #111114 0%, #0d0d11 100%);
-        box-shadow: 0 20px 60px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.03);
-      }
-
-      .hero::after {
-        content: '';
-        position: absolute;
-        inset: 0;
-        pointer-events: none;
-        background: linear-gradient(120deg, transparent 0%, rgba(247,209,38,.08) 18%, transparent 36%);
-        mix-blend-mode: screen;
-      }
-
-      .hero-top {
-        display: flex;
-        justify-content: space-between;
-        gap: 1rem;
-        align-items: flex-start;
-        flex-wrap: wrap;
-        margin-bottom: 1rem;
-      }
-
-      .hero-kicker {
-        display: inline-flex;
-        align-items: center;
-        gap: .45rem;
-        font-size: .76rem;
-        font-weight: 800;
-        text-transform: uppercase;
-        letter-spacing: .18em;
-        color: var(--accent);
-        margin-bottom: .75rem;
-      }
-
-      .hero h1 {
-        margin: 0;
-        font-size: clamp(2.1rem, 5vw, 4rem);
-        line-height: .95;
-      }
-
-      .hero p {
-        margin: .85rem 0 0;
-        max-width: 60ch;
-        color: #c9c9d2;
-      }
-
-      .hero-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: .55rem;
-        padding: .7rem .9rem;
-        border: 1px solid rgba(247,209,38,.22);
-        background: rgba(247,209,38,.08);
-        color: #f8e58d;
-        border-radius: 999px;
-        font-weight: 700;
-        white-space: nowrap;
-      }
-
-      .hero-stats {
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: .8rem;
-      }
-
-      .hero-stat {
-        border: 1px solid var(--border);
-        border-radius: 16px;
-        padding: .9rem 1rem;
-        background: rgba(255,255,255,.025);
-        backdrop-filter: blur(8px);
-      }
-
-      .hero-stat .k { color: var(--text-muted); font-size: .78rem; text-transform: uppercase; letter-spacing: .08em; }
-      .hero-stat .v { margin-top: .2rem; font-size: 1.45rem; font-weight: 800; }
-
       .toolbar {
         display: flex;
         gap: .75rem;
         align-items: center;
-        justify-content: space-between;
         margin-bottom: 1rem;
-        flex-wrap: wrap;
       }
 
-      .toolbar-copy {
-        color: var(--text-muted);
-        font-size: .95rem;
-      }
-
-      .toolbar input { min-width: 260px; }
+      .toolbar input { min-width: 230px; }
       ol { margin: .35rem 0 0 1.4rem; padding: 0; }
       li { margin: .5rem 0; }
-
-      .podium {
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: .8rem;
-        margin-bottom: 1rem;
-      }
-
-      .podium-card {
-        position: relative;
-        overflow: hidden;
-        border-radius: 18px;
-        padding: 1rem;
-        border: 1px solid var(--border);
-        background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.015));
-      }
-
-      .podium-card::before {
-        content: '';
-        position: absolute;
-        inset: 0;
-        pointer-events: none;
-        background: linear-gradient(180deg, rgba(247,209,38,.13), transparent 45%);
-        opacity: .55;
-      }
-
-      .podium-card.gold {
-        border-color: rgba(247,209,38,.38);
-        box-shadow: 0 18px 38px rgba(247,209,38,.13);
-      }
-
-      .podium-rank {
-        display: inline-flex;
-        align-items: center;
-        gap: .4rem;
-        margin-bottom: .8rem;
-        color: var(--accent);
-        font-size: .82rem;
-        font-weight: 800;
-        text-transform: uppercase;
-        letter-spacing: .1em;
-      }
-
-      .podium-name {
-        font-size: 1.2rem;
-        font-weight: 800;
-        margin-bottom: .35rem;
-      }
-
-      .podium-name a { color: var(--text); }
-      .podium-meta {
-        color: var(--text-muted);
-        font-size: .94rem;
-      }
 
       .metric .k { color: var(--text-muted); font-size: .88rem; }
       .metric .v { margin-top: .25rem; font-size: 1.45rem; font-weight: 700; }
@@ -541,8 +386,6 @@
         .grid { grid-template-columns: 1fr; }
         .meta { grid-template-columns: repeat(2, minmax(0, 1fr)); }
         .stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-        .hero-stats,
-        .podium { grid-template-columns: 1fr; }
       }
 
       @media (max-width: 760px) {
@@ -550,15 +393,12 @@
       }
 
       @media (max-width: 620px) {
-        .container { padding: 1.1rem .75rem 2rem; }
+        .container { padding: 1.35rem .75rem 2rem; }
         .grid,
         .meta,
         .add-row,
-        .stat-grid,
-        .hero-stats,
-        .podium { grid-template-columns: 1fr; }
+        .stat-grid { grid-template-columns: 1fr; }
         .toolbar input { min-width: 0; width: 100%; }
-        .hero h1 { font-size: 2.4rem; }
       }
     </style>
 
@@ -566,31 +406,6 @@
   </head>
   <body>
     <div class="container">
-      <section class="hero">
-        <div class="hero-top">
-          <div>
-            <div class="hero-kicker">👑 Crown Table Rankings</div>
-            <h1 class="display">Guildmaster 👑</h1>
-            <p>Competitive pods, sharp score swings, and a leaderboard that actually feels like winning matters. Track the table, chase the crown, and keep the receipts.</p>
-          </div>
-          <div class="hero-badge">👑 Live leaderboard</div>
-        </div>
-        <div class="hero-stats">
-          <div class="hero-stat">
-            <div class="k">Ranked players</div>
-            <div class="v">{{ .PlayerCount }}</div>
-          </div>
-          <div class="hero-stat">
-            <div class="k">Recent games shown</div>
-            <div class="v">{{ len .Games }}</div>
-          </div>
-          <div class="hero-stat">
-            <div class="k">Current crown holder</div>
-            <div class="v">{{ if gt (len .Ranked) 0 }}{{ (index .Ranked 0).Name }}{{ else }}—{{ end }}</div>
-          </div>
-        </div>
-      </section>
-
       <div class="nav">
         <a href="/">Leaderboard</a>
         <a href="/games">Game History</a>
@@ -605,123 +420,33 @@
         {{ end }}
         </div>
       </div>
-
-      <section class="podium">
-        {{ range .Ranked }}
-          {{ if le .Rank 3 }}
-          <article class="podium-card {{ if eq .Rank 1 }}gold{{ end }}">
-            <div class="podium-rank">{{ if eq .Rank 1 }}👑{{ else if eq .Rank 2 }}⚔️{{ else }}🛡️{{ end }} Rank {{ .Rank }}</div>
-            <div class="podium-name"><a href="/players/{{ .Name | urlquery }}">{{ .Name }}</a></div>
-            <div class="podium-meta">{{ .Elo }} Elo · {{ .GamesPlayed }} games · <span class="{{ deltaClass .Delta }}">{{ if gt .Delta 0 }}+{{ end }}{{ .Delta }}</span> delta</div>
-          </article>
-          {{ end }}
-        {{ end }}
-      </section>
-
-      <div class="toolbar">
-        <div class="toolbar-copy">Filter the table, scout momentum, and see who’s closest to the crown.</div>
-        <input id="playerFilter" placeholder="Filter players..." aria-label="Filter players" />
-      </div>
+      <h1 style="margin:0;">Game History</h1>
+      <p class="muted" style="margin:.35rem 0 1rem;">All submitted games, newest first.</p>
 
       <div class="card">
-        <h2 class="display" style="margin-top:0; margin-bottom:.8rem;">Full Rankings</h2>
-        <table id="leaderboardTable">
-          <thead>
-            <tr>
-              <th class="sortable" data-key="rank" data-type="number">#</th>
-              <th class="sortable" data-key="name" data-type="string">Player</th>
-              <th class="sortable num" data-key="elo" data-type="number">Elo</th>
-              <th class="sortable num" data-key="delta" data-type="number">Delta</th>
-              <th class="sortable num" data-key="games" data-type="number">Games</th>
-              <th class="sortable num" data-key="winrate" data-type="number">Win Rate</th>
-            </tr>
-          </thead>
-          <tbody>
-          {{- range .Ranked }}
-            <tr data-rank="{{ .Rank }}" data-name="{{ .Name }}" data-elo="{{ .Elo }}" data-delta="{{ .Delta }}" data-games="{{ .GamesPlayed }}" data-winrate="{{ printf "%.2f" .WinRate }}">
-              <td class="num">{{ .Rank }}</td>
-              <td><a class="player-link" href="/players/{{ .Name | urlquery }}">{{ .Name }}</a></td>
-              <td class="num">{{ .Elo }}</td>
-              <td class="num {{ deltaClass .Delta }}">{{ if gt .Delta 0 }}+{{ end }}{{ .Delta }}</td>
-              <td class="num">{{ .GamesPlayed }}</td>
-              <td class="num">{{ printf "%.1f%%" .WinRate }}</td>
-            </tr>
-          {{- end }}
-          </tbody>
-        </table>
-      </div>
-
-      <div class="card" style="margin-top: 1rem;">
-        <h2 style="margin-top:0;">Recent Games</h2>
         <table>
-          <thead><tr><th>Date</th><th>Players</th><th class="hide-sm">Source</th></tr></thead>
+          <thead>
+            <tr><th>Date</th><th>Players</th><th class="num">Count</th><th class="hide-sm">Source</th></tr>
+          </thead>
           <tbody>
           {{- range .Games }}
             <tr>
-              <td><a class="player-link" href="/games/{{ .ID }}">{{ humanDate .PlayedAt }}</a></td>
-              <td>{{- range $i, $p := .Placements }}{{ if $i }}, {{ end }}{{ $p.Player }}{{- end }}</td>
+              <td><a class="link" href="/games/{{ .ID }}">{{ .PlayedAt }}</a></td>
+              <td>{{ .Players }}</td>
+              <td class="num">{{ .Count }}</td>
               <td class="hide-sm muted">{{ .Source }}</td>
             </tr>
           {{- end }}
           </tbody>
         </table>
+
+        <div class="pager">
+          {{ if .HasPrev }}<a href="/games?page={{ .PrevPage }}">Previous</a>{{ end }}
+          <span class="muted">Page {{ .Page }} of {{ .TotalPages }} ({{ .Total }} games)</span>
+          {{ if .HasNext }}<a href="/games?page={{ .NextPage }}">Next</a>{{ end }}
+        </div>
       </div>
     </div>
-
-    <script>
-      (function() {
-        const table = document.getElementById('leaderboardTable');
-        if (!table) return;
-        const tbody = table.querySelector('tbody');
-        const headers = table.querySelectorAll('th.sortable');
-        const filterInput = document.getElementById('playerFilter');
-
-        let sortKey = 'rank';
-        let sortAsc = true;
-
-        function parseValue(row, key, type) {
-          const raw = row.dataset[key] || '';
-          return type === 'number' ? Number(raw) : raw.toLowerCase();
-        }
-
-        function render() {
-          const q = (filterInput?.value || '').trim().toLowerCase();
-          const rows = Array.from(tbody.querySelectorAll('tr'));
-          rows.sort((a, b) => {
-            const header = table.querySelector(`th[data-key="${sortKey}"]`);
-            const type = header ? header.dataset.type : 'number';
-            const av = parseValue(a, sortKey, type);
-            const bv = parseValue(b, sortKey, type);
-            if (av === bv) return 0;
-            if (sortAsc) return av > bv ? 1 : -1;
-            return av < bv ? 1 : -1;
-          });
-
-          rows.forEach(row => {
-            const name = (row.dataset.name || '').toLowerCase();
-            row.style.display = !q || name.includes(q) ? '' : 'none';
-            tbody.appendChild(row);
-          });
-        }
-
-        headers.forEach(h => {
-          h.addEventListener('click', () => {
-            const clicked = h.dataset.key;
-            if (clicked === sortKey) {
-              sortAsc = !sortAsc;
-            } else {
-              sortKey = clicked;
-              sortAsc = clicked === 'name';
-            }
-            render();
-          });
-        });
-
-        if (filterInput) {
-          filterInput.addEventListener('input', render);
-        }
-      })();
-    </script>
     <script>document.addEventListener('DOMContentLoaded', function () { document.body.classList.add('loaded'); });</script>
   </body>
 </html>

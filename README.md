@@ -46,7 +46,8 @@ This approach gives more consistent and interpretable rating changes for multipl
 
 ## Requirements
 
-- Go 1.25
+- Go 1.26+ for direct local builds/runs
+- Docker (optional, used automatically by `make build`, `make test`, `make server`, and related targets when local Go is too old)
 - Dependencies:
   - github.com/kortemy/elo-go
   - Make
@@ -58,13 +59,14 @@ This approach gives more consistent and interpretable rating changes for multipl
 git clone https://github.com/dylanlott/guildmaster.git
 cd guildmaster
 
-# Build the application locally 
+# Build the application.
+# If your local Go is older than 1.26, the Makefile falls back to Docker.
 make build
 
-# Run the scoring algorith
+# Run the scoring algorithm
 make run
 
-# Run the terminal application 
+# Run the terminal application (requires a local Go 1.26+ toolchain)
 make tui
 ```
 

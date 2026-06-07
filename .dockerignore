@@ -1,0 +1,14 @@
+.git
+.gitignore
+.gomodcache
+bin
+build
+dist
+node_modules
+data
+*.db
+*.sqlite
+*.sqlite3
+guildmaster
+Dockerfile*
+docker-compose*.yml
