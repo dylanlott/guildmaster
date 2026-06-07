@@ -46,7 +46,8 @@ This approach gives more consistent and interpretable rating changes for multipl
 
 ## Requirements
 
-- Go 1.25
+- Go 1.26+ for direct local builds/runs
+- Docker (optional, used automatically by `make build`, `make test`, `make server`, and related targets when local Go is too old)
 - Dependencies:
   - github.com/kortemy/elo-go
   - Make
@@ -58,13 +59,14 @@ This approach gives more consistent and interpretable rating changes for multipl
 git clone https://github.com/dylanlott/guildmaster.git
 cd guildmaster
 
-# Build the application locally 
+# Build the application.
+# If your local Go is older than 1.26, the Makefile falls back to Docker.
 make build
 
-# Run the scoring algorith
+# Run the scoring algorithm
 make run
 
-# Run the terminal application 
+# Run the terminal application (requires a local Go 1.26+ toolchain)
 make tui
 ```
 
@@ -122,13 +124,40 @@ Where:
 
 ## Web server
 
-A small HTTP server is provided under `cmd/server`. It exposes a tiny REST API and serves static files from the `assets/` directory.
+The server under `cmd/server` is now a small persistent web app backed by SQLite. It serves server-rendered pages, session auth, pod management, and a JSON API.
 
-Endpoints:
+Key routes:
 
-- `GET /api/scores`  -> returns current scores as JSON
+- `GET /` -> leaderboard
+- `GET /games` / `GET /games/:id` -> game history and detail
+- `GET /players/:name` -> player profile
+- `GET /pods` -> pod list and pod detail flows
+- `GET /submit` -> privileged submit UI for owner/admin accounts
+- `GET /admin/users` -> role management UI (admins can view, owners can change roles)
+- `GET /api/scores` -> current scores as JSON
+- `GET /api/players/:name` -> player profile JSON
+- `GET /api/games` / `GET /api/games/:id` -> game history JSON
+- `POST /api/games` -> submit a game (session owner/admin + CSRF, or `Authorization: Bearer $GUILDMASTER_ADMIN_KEY`)
+- `POST /api/refresh` -> refresh from Sheets with the same privileged auth
 
-- `POST /api/game`  -> accepts `{"players": ["A","B",...]}`, computes Elo deltas and persists them in-memory
+### Auth model
+
+- Browser auth uses username/password login with a persistent session cookie.
+- Roles are `member`, `admin`, and `owner`.
+- The first user in a fresh database becomes `owner`.
+- Owners can promote/demote users at `/admin/users`.
+- Guildmaster prevents removing the last remaining owner.
+- Session-authenticated POSTs require a CSRF token.
+
+### Runtime config
+
+See `.env.example` for the current config surface:
+
+- `SPREADSHEET_ID`
+- `SCOREBOARD_API_KEY`
+- `GUILDMASTER_ADMIN_KEY`
+- `DATABASE_PATH`
+- `PORT`
 
 Run the server locally:
 
@@ -139,7 +168,7 @@ make server
 go run ./cmd/server
 ```
 
-Open `http://localhost:8080` to view the minimal web UI (`assets/index.html`).
+Open `http://localhost:8080` to use the web UI.
 
 ## How It Works
 

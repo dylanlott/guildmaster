@@ -2,16 +2,16 @@ package server
 
 import (
 	"context"
-	"encoding/json"
+	"errors"
 	"fmt"
-	"net/http"
-	"os"
 	"strings"
 	"time"
 
 	"google.golang.org/api/option"
 	"google.golang.org/api/sheets/v4"
 )
+
+var ErrSheetsNotConfigured = errors.New("Sheets not configured")
 
 // Game mirrors the shape used in the previous app.go for Sheets-backed games.
 type Game struct {
@@ -23,13 +23,17 @@ type Game struct {
 	DrawGame  string    `json:"draw_game"`
 }
 
-const spreadsheetID = "1-qr-ejHx07Hrr35OymMcGRH00-Jzb-k8S8-xS9P5vqk"
+// FetchGameData retrieves rows from Google Sheets and parses them into Game objects.
+func FetchGameData(spreadsheetID, apiKey string) ([]*Game, error) {
+	if strings.TrimSpace(spreadsheetID) == "" {
+		return nil, ErrSheetsNotConfigured
+	}
+	if strings.TrimSpace(apiKey) == "" {
+		return nil, ErrSheetsNotConfigured
+	}
 
-// fetchGameData retrieves rows from Google Sheets and parses them into Game objects.
-func fetchGameData() ([]*Game, error) {
 	ctx := context.Background()
-	key := os.Getenv("SCOREBOARD_API_KEY")
-	srv, err := sheets.NewService(ctx, option.WithAPIKey(key))
+	srv, err := sheets.NewService(ctx, option.WithAPIKey(strings.TrimSpace(apiKey)))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create sheets client: %w", err)
 	}
@@ -43,6 +47,10 @@ func fetchGameData() ([]*Game, error) {
 		return nil, fmt.Errorf("no game data found")
 	}
 	return parseGameData(resp.Values)
+}
+
+func (s *Server) fetchGameData() ([]*Game, error) {
+	return FetchGameData(s.cfg.SpreadsheetID, s.cfg.ScoreboardAPIKey)
 }
 
 // parseGameData converts the raw Sheets values into a slice of Game.
@@ -93,18 +101,4 @@ func parseGameData(values [][]interface{}) ([]*Game, error) {
 		games = append(games, g)
 	}
 	return games, nil
-}
-
-//
-// HTTP handlers
-//
-
-func (s *Server) HandleGetGames(w http.ResponseWriter, r *http.Request) {
-	games, err := fetchGameData()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	w.Header().Set("Content-Type", "application/json")
-	_ = json.NewEncoder(w).Encode(games)
 }

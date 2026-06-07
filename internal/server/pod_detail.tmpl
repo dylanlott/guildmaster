@@ -1,0 +1,461 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="https://fav.farm/👑" />
+    <link rel="apple-touch-icon" href="https://fav.farm/👑" />
+    <title>Guildmaster - {{ .Pod.Name }}</title>
+            <style>
+      :root {
+        --bg: #09090b;
+        --surface: #111113;
+        --surface-2: #18181b;
+        --surface-3: #1e1e23;
+        --border: #27272a;
+        --border-2: #3f3f46;
+        --text: #e4e4e7;
+        --text-muted: #71717a;
+        --accent: #f7d126;
+        --accent-dim: rgba(247,209,38,.15);
+        --positive: #49a078;
+        --negative: #c62f3b;
+        --radius: 10px;
+        --radius-sm: 6px;
+        color-scheme: dark;
+      }
+
+      *, *::before, *::after { box-sizing: border-box; }
+
+      @keyframes fade-up {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      @keyframes pulse-accent {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(247,209,38,.5); }
+        60% { box-shadow: 0 0 0 6px rgba(247,209,38,0); }
+      }
+
+      @keyframes shimmer {
+        0% { transform: translateX(-120%); }
+        100% { transform: translateX(120%); }
+      }
+
+      body {
+        margin: 0;
+        font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+        background:
+          radial-gradient(120% 80% at 15% -10%, #17171b 0%, transparent 55%),
+          radial-gradient(80% 60% at 100% 0%, #121218 0%, transparent 60%),
+          var(--bg);
+        color: var(--text);
+        line-height: 1.5;
+      }
+
+      .container {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 2rem 1rem 2.8rem;
+      }
+
+      h1, h2, h3 {
+        color: var(--text);
+        letter-spacing: -0.02em;
+      }
+
+      a {
+        color: var(--accent);
+        text-decoration: none;
+      }
+
+      a:hover {
+        color: var(--accent);
+        text-decoration: underline;
+      }
+
+      .nav {
+        display: flex;
+        gap: .75rem;
+        margin-bottom: 1rem;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+
+      .nav a,
+      .nav span {
+        color: var(--accent);
+        text-decoration: none;
+        font-weight: 600;
+      }
+
+      .nav-right {
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+        gap: .6rem;
+        flex-wrap: wrap;
+      }
+
+      .nav-right form { margin: 0; }
+
+      .muted,
+      .subtitle,
+      label {
+        color: var(--text-muted);
+      }
+
+      .card,
+      .metric,
+      .player-block,
+      details.card,
+      table {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      body.loaded .card,
+      body.loaded .metric,
+      body.loaded .player-block,
+      body.loaded details.card,
+      body.loaded table {
+        animation: fade-up .42s ease both;
+      }
+
+      .card,
+      .metric,
+      .player-block,
+      details.card {
+        position: relative;
+        overflow: hidden;
+        background: linear-gradient(180deg, var(--surface) 0%, var(--surface-2) 100%);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 1rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 12px 34px rgba(0,0,0,.42);
+        transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+      }
+
+      .card:last-child,
+      details.card:last-child { margin-bottom: 0; }
+
+      .card::before,
+      .metric::before,
+      .player-block::before,
+      details.card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 1px;
+        width: 100%;
+        background: linear-gradient(90deg, transparent 0%, var(--accent) 50%, transparent 100%);
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .card:hover,
+      .metric:hover,
+      .player-block:hover,
+      details.card:hover {
+        transform: translateY(-2px);
+        border-color: var(--border-2);
+        box-shadow: 0 16px 38px rgba(0,0,0,.5), 0 0 0 1px rgba(247,209,38,.16), 0 0 24px rgba(247,209,38,.3);
+      }
+
+      .card:hover::before,
+      .metric:hover::before,
+      .player-block:hover::before,
+      details.card:hover::before {
+        opacity: .95;
+        animation: shimmer .9s ease;
+      }
+
+      .row {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        align-items: center;
+        border-bottom: 1px solid var(--border);
+        padding: .7rem 0;
+      }
+
+      .row:last-child { border-bottom: none; }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-variant-numeric: tabular-nums;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        overflow: hidden;
+      }
+
+      th,
+      td {
+        text-align: left;
+        padding: .56rem .66rem;
+        border-bottom: 1px solid var(--border);
+      }
+
+      thead th {
+        background: var(--surface-2);
+        color: var(--text-muted);
+        font-size: .74rem;
+        text-transform: uppercase;
+        letter-spacing: .06em;
+        font-weight: 700;
+      }
+
+      tbody tr { transition: background .15s ease; }
+      tbody tr:hover { background: rgba(247,209,38,.06); }
+      tbody tr:last-child td { border-bottom: none; }
+
+      .num { text-align: right; }
+      .pos, .delta-pos { color: var(--positive); font-weight: 700; }
+      .neg, .delta-neg { color: var(--negative); font-weight: 700; }
+      .zero, .delta-zero { color: var(--text-muted); }
+
+      button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: .35rem;
+        width: 100%;
+        border: 1px solid rgba(247,209,38,.28);
+        border-radius: var(--radius-sm);
+        background: linear-gradient(180deg, #f7d126 0%, #e8be20 100%);
+        color: #1b1808;
+        font-weight: 700;
+        padding: .55rem .72rem;
+        cursor: pointer;
+        transition: transform .16s ease, filter .16s ease, box-shadow .16s ease;
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: .35rem;
+        width: auto;
+        border: 1px solid rgba(247,209,38,.28);
+        border-radius: var(--radius-sm);
+        background: linear-gradient(180deg, #f7d126 0%, #e8be20 100%);
+        color: #1b1808;
+        font-weight: 700;
+        padding: .55rem .72rem;
+        text-decoration: none;
+        transition: transform .16s ease, filter .16s ease, box-shadow .16s ease;
+      }
+
+      button:hover,
+      .btn:hover {
+        transform: translateY(-1px);
+        filter: brightness(1.03);
+        box-shadow: 0 0 0 1px rgba(247,209,38,.22), 0 8px 20px rgba(247,209,38,.24);
+        text-decoration: none;
+      }
+
+      button:focus-visible,
+      .btn:focus-visible,
+      input:focus,
+      select:focus,
+      textarea:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 2px rgba(247,209,38,.2);
+      }
+
+      .nav-right button,
+      .nav-right .btn,
+      .rank-actions button,
+      .actions button,
+      .add-row button {
+        width: auto;
+      }
+
+      input,
+      select,
+      textarea {
+        width: 100%;
+        background: var(--surface-2);
+        color: var(--text);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        padding: .55rem .65rem;
+      }
+
+      textarea { min-height: 90px; resize: vertical; }
+
+      label {
+        display: block;
+        font-size: .9rem;
+        margin-bottom: .35rem;
+      }
+
+      .field { margin-bottom: .7rem; }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: .75rem;
+      }
+
+      .meta {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: .75rem;
+      }
+
+      .pager,
+      .actions,
+      .tabs {
+        display: flex;
+        gap: .75rem;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+
+      .rankings {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: grid;
+        gap: .6rem;
+      }
+
+      .rank-item {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: .6rem;
+        align-items: center;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        padding: .55rem .7rem;
+        background: var(--surface-2);
+      }
+
+      .rank-actions { display: flex; gap: .35rem; }
+      .rank-actions button { padding: .35rem .55rem; font-size: .85rem; }
+
+      .add-row {
+        display: grid;
+        grid-template-columns: 1fr 150px;
+        gap: .6rem;
+      }
+
+      .summary-list { margin: .5rem 0 0 1.1rem; }
+      .error, .danger { color: var(--negative); }
+      .error { margin: .5rem 0 0; min-height: 1.2rem; }
+
+      .toolbar {
+        display: flex;
+        gap: .75rem;
+        align-items: center;
+        margin-bottom: 1rem;
+      }
+
+      .toolbar input { min-width: 230px; }
+      ol { margin: .35rem 0 0 1.4rem; padding: 0; }
+      li { margin: .5rem 0; }
+
+      .metric .k { color: var(--text-muted); font-size: .88rem; }
+      .metric .v { margin-top: .25rem; font-size: 1.45rem; font-weight: 700; }
+      .chart-wrap { margin-top: .55rem; }
+      #trendChart { width: 100%; height: 170px; display: block; }
+
+      .stat-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: .6rem;
+      }
+
+      details > summary {
+        cursor: pointer;
+        color: var(--accent);
+        font-weight: 600;
+      }
+
+      .sortable { cursor: pointer; user-select: none; }
+      .sortable:hover { color: var(--accent); }
+      .hide-sm { display: table-cell; }
+
+      @media (max-width: 900px) {
+        .grid { grid-template-columns: 1fr; }
+        .meta { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      }
+
+      @media (max-width: 760px) {
+        .hide-sm { display: none; }
+      }
+
+      @media (max-width: 620px) {
+        .container { padding: 1.35rem .75rem 2rem; }
+        .grid,
+        .meta,
+        .add-row,
+        .stat-grid { grid-template-columns: 1fr; }
+        .toolbar input { min-width: 0; width: 100%; }
+      }
+    </style>
+
+
+  </head>
+  <body>
+    <div class="container">
+      <div class="nav">
+        <a href="/">Leaderboard</a>
+        <a href="/pods">Pods</a>
+        <span>/</span>
+        <a href="/pods/{{ .Pod.Slug }}">{{ .Pod.Name }}</a>
+        <div class="nav-right">
+          {{ if .CanJoin }}<form method="post" action="/pods/{{ .Pod.Slug }}/join"><input type="hidden" name="csrf_token" value="{{ .Nav.CSRFToken }}" /><button type="submit">Join Pod</button></form>{{ end }}
+          {{ if .CanSubmit }}<a class="btn" href="/pods/{{ .Pod.Slug }}/submit">Submit Game</a>{{ end }}
+          {{ if .Nav.LoggedIn }}
+            <span class="muted">@{{ .Nav.Username }}</span>
+            <form method="post" action="/logout"><input type="hidden" name="csrf_token" value="{{ .Nav.CSRFToken }}" /><button type="submit">Logout</button></form>
+          {{ else }}
+            <a href="/login">Login</a>
+          {{ end }}
+        </div>
+      </div>
+
+      <div class="card">
+        <h1 style="margin:0;">{{ .Pod.Name }}</h1>
+        <p class="muted" style="margin:.35rem 0;">{{ if .Pod.Description }}{{ .Pod.Description }}{{ else }}No description.{{ end }}</p>
+        <p class="muted" style="margin:.35rem 0 0;">{{ .MemberCount }} members - {{ if .Pod.Public }}Public{{ else }}Private{{ end }} - Format: {{ .Pod.Format }}</p>
+        <div class="tabs">
+          <a href="/pods/{{ .Pod.Slug }}">Leaderboard</a>
+          <a href="/pods/{{ .Pod.Slug }}/games">Games</a>
+          <span class="muted">Members</span>
+          {{ if .CanConfigure }}<span class="muted">Settings</span>{{ end }}
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 style="margin-top:0;">Leaderboard</h2>
+        <table>
+          <thead><tr><th>#</th><th>Player</th><th class="num">Elo</th><th class="num">Games</th><th class="num">Wins</th><th class="num">Win Rate</th></tr></thead>
+          <tbody>
+          {{ range $i, $r := .Leaderboard }}
+            <tr>
+              <td class="num">{{ add $i 1 }}</td>
+              <td><a class="link" href="/players/{{ $r.Name | urlquery }}">{{ $r.Name }}</a></td>
+              <td class="num">{{ $r.Elo }}</td>
+              <td class="num">{{ $r.Games }}</td>
+              <td class="num">{{ $r.Wins }}</td>
+              <td class="num">{{ printf "%.1f%%" $r.WinRate }}</td>
+            </tr>
+          {{ else }}
+            <tr><td colspan="6" class="muted">No games recorded for this pod yet.</td></tr>
+          {{ end }}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <script>document.addEventListener('DOMContentLoaded', function () { document.body.classList.add('loaded'); });</script>
+  </body>
+</html>

@@ -1,15 +1,19 @@
 services:
   guildmaster:
-    image: guildmaster
+    image: guildmaster:latest
     build:
       context: .
       dockerfile: Dockerfile
     restart: always
     ports:
-      - "8080:8080"
+      - "${PORT:-8080}:8080"
     env_file:
       - .env
-    # Mount local assets so you can edit static files without rebuilding the image.
-    # Remove this volume if you want the assets baked into the image instead.
+    environment:
+      PORT: "${PORT:-8080}"
+      DATABASE_PATH: "${DATABASE_PATH:-/data/guildmaster.db}"
+      SPREADSHEET_ID: "${SPREADSHEET_ID:-}"
+      SCOREBOARD_API_KEY: "${SCOREBOARD_API_KEY:-}"
+      GUILDMASTER_ADMIN_KEY: "${GUILDMASTER_ADMIN_KEY:-}"
     volumes:
-      - ./assets:/app/assets:ro
+      - ./data:/data
